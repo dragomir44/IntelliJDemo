@@ -1,4 +1,6 @@
+import javax.sound.sampled.LineUnavailableException;
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseWheelEvent;
@@ -32,6 +34,7 @@ public class GUI {
     private int EndOfDay = 18;
     private String QuoteFilename = "Quotes.txt";
     private List<String> quotes;
+    private SoundUtils sound = new SoundUtils();
 
 
     public GUI() {
@@ -43,7 +46,7 @@ public class GUI {
         workTillTextField.setText(EndOfDay + "");
         new Thread(){
             public void run() {
-                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm");
                 while(true){
                     long millis = System.currentTimeMillis();
                     LocalTime now = LocalTime.now();
@@ -55,18 +58,20 @@ public class GUI {
                     int minute = Integer.parseInt(time.substring(3,5));
 
                     if (hour < EndOfDay && hour >= StartOfDay){
-                        float minOfWorkingDay = CalculateMinutes(StartOfDay, EndOfDay);
+                        float minOfWorkingDay = ((EndOfDay-StartOfDay)*60);
                         float hoursPassed = hour - StartOfDay;
                         float minPassed = hoursPassed * 60;
                         float totalPassed = minPassed + minute;
 
                         float percent = Math.round(totalPassed/minOfWorkingDay*100);
                         percentage.setText((int)percent + "%");
+                    } else if (hour == EndOfDay && minute == 0) {
+                        MakeSound();
                     }
 
-                    //Sleep code for 1 second to prevent CPU drainage
+                    //Sleep code for 1 minute to prevent CPU drainage
                     try {
-                        Thread.sleep(1000 - millis % 1000);
+                        Thread.sleep(1000*60 - millis % (1000*60));
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -98,8 +103,19 @@ public class GUI {
         });
     }
 
-    public int CalculateMinutes(int begin, int end){
-        return ((end-begin) * 60);
+    public void MakeSound(){
+        try {
+            sound.tone(400,500);
+            Thread.sleep(200);
+            sound.tone(400,500);
+            Thread.sleep(200);
+            sound.tone(400,500);
+            Thread.sleep(200);
+        } catch (LineUnavailableException e1) {
+            e1.printStackTrace();
+        }catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
     }
 
     public void ReadQuotes(String filename){
@@ -117,6 +133,17 @@ public class GUI {
         }
     }
     public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
         JFrame frame = new JFrame("GUI");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
@@ -124,6 +151,5 @@ public class GUI {
         frame.add(g.panel1);
         frame.pack();
         frame.setLocationRelativeTo(null);
-
     }
 }
