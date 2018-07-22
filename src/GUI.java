@@ -1,6 +1,8 @@
 import javax.swing.*;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 /**
@@ -40,7 +42,9 @@ public class GUI {
                     } else {
                         percentage.setText("Workday over");
                     }
+                    quote.setText("q");
                 }
+
             }
         }.start();
     }
@@ -49,8 +53,29 @@ public class GUI {
         return ((end-begin) * 60);
     }
 
-    
+    public static String ReadQuotes(String filename){
+        String quotes = null;
+        try(BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+
+            while (line != null) {
+                sb.append(line);
+                sb.append(System.lineSeparator());
+                line = br.readLine();
+            }
+            return quotes = sb.toString();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
     public static void main(String[] args) {
+        String quotes = null;
+        ReadQuotes("Quotes.txt");
         JFrame frame = new JFrame("GUI");
         frame.setContentPane(new GUI().percentage);
         frame.setContentPane(new GUI().percentpanel);
