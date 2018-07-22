@@ -1,4 +1,6 @@
 import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -7,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -21,19 +22,23 @@ public class GUI {
     private JLabel percentage;
     private JPanel quotepanel;
     private JLabel quote;
-    private JLabel remaining;
+    private JTextField workFromTextField;
+    private JTextField workTillTextField;
 
     //Set the hours of your working day
-    private int StartOfDay = 01;
-    private int EndOfDay = 05;
+    private int StartOfDay = 8;
+    private int EndOfDay = 18;
     private String QuoteFilename = "Quotes.txt";
     private List<String> quotes;
 
 
     public GUI() {
         ReadQuotes(QuoteFilename);
-        int randomquote = ThreadLocalRandom.current().nextInt(0, 20);
-        percentage.setText("Workday over");
+        int randomQuote = ThreadLocalRandom.current().nextInt(0, 19);
+        percentage.setText("No more work");
+        quote.setText(quotes.get(randomQuote));
+        workFromTextField.setText(StartOfDay + "");
+        workTillTextField.setText(EndOfDay + "");
         new Thread(){
             public void run() {
                 SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
@@ -48,14 +53,15 @@ public class GUI {
                     int hour = Integer.parseInt(strDate.substring(0,2));
                     int minute = Integer.parseInt(strDate.substring(3,5));
 
-                    if (hour < EndOfDay & hour >= StartOfDay){
-                        float min = CalculateMinutes(StartOfDay, EndOfDay);
-                        remaining.setText(min + "");
-                        //FORMULA HAS BUG. TODO
-                        float percent = Math.round(minute/min*100);
+                    if (hour < EndOfDay && hour >= StartOfDay){
+                        float minOfWorkingDay = CalculateMinutes(StartOfDay, EndOfDay);
+                        float hoursPassed = hour - StartOfDay;
+                        float minPassed = hoursPassed * 60;
+                        float totalPassed = minPassed + minute;
+
+                        float percent = Math.round(totalPassed/minOfWorkingDay*100);
                         percentage.setText((int)percent + "%");
                     }
-                    quote.setText(quotes.get(randomquote));
 
                     //Sleep code for 1 second to prevent CPU drainage
                     try {
@@ -67,6 +73,19 @@ public class GUI {
 
             }
         }.start();
+        button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String workFrom = workFromTextField.getText();
+                String workTill = workTillTextField.getText();
+                if (!workFrom.equals("") && !workTill.equals("")) {
+                    StartOfDay = Integer.parseInt(workFrom);
+                    EndOfDay = Integer.parseInt(workTill);
+                }
+                int random = ThreadLocalRandom.current().nextInt(0, 19);
+                quote.setText(quotes.get(random));
+            }
+        });
     }
 
     public int CalculateMinutes(int begin, int end){
