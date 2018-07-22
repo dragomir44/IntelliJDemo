@@ -1,13 +1,15 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -26,7 +28,7 @@ public class GUI {
     private JTextField workTillTextField;
 
     //Set the hours of your working day
-    private int StartOfDay = 8;
+    private int StartOfDay = 11;
     private int EndOfDay = 18;
     private String QuoteFilename = "Quotes.txt";
     private List<String> quotes;
@@ -41,17 +43,16 @@ public class GUI {
         workTillTextField.setText(EndOfDay + "");
         new Thread(){
             public void run() {
-                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
                 while(true){
                     long millis = System.currentTimeMillis();
-                    //Using SimpleDateFormat which is a better practise than Calendar
-                    Date now = new Date();
-                    String strDate = sdf.format(now);
-                    clock.setText(strDate);
+                    LocalTime now = LocalTime.now();
+                    String time = dtf.format(now);
+                    clock.setText(time + "");
 
                     //Calculating percentage of working day
-                    int hour = Integer.parseInt(strDate.substring(0,2));
-                    int minute = Integer.parseInt(strDate.substring(3,5));
+                    int hour = Integer.parseInt(time.substring(0,2));
+                    int minute = Integer.parseInt(time.substring(3,5));
 
                     if (hour < EndOfDay && hour >= StartOfDay){
                         float minOfWorkingDay = CalculateMinutes(StartOfDay, EndOfDay);
@@ -73,6 +74,7 @@ public class GUI {
 
             }
         }.start();
+        //Change working variables and quote when button clicked
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -82,6 +84,14 @@ public class GUI {
                     StartOfDay = Integer.parseInt(workFrom);
                     EndOfDay = Integer.parseInt(workTill);
                 }
+                int random = ThreadLocalRandom.current().nextInt(0, 19);
+                quote.setText(quotes.get(random));
+            }
+        });
+        //Change quote when scrolling
+        panel1.addMouseWheelListener(new MouseWheelListener() {
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
                 int random = ThreadLocalRandom.current().nextInt(0, 19);
                 quote.setText(quotes.get(random));
             }
