@@ -10,6 +10,6 @@ Using this clock gives a super-fast glance if I'm happy with the work I've done 
 It is also a great indicatior for when the working world stops working... so around 18:00.
 Oh and on the side, it also can show your favourite quotes randomly.
 
-![alt text](https://imgur.com/a/ydZ9f8o)
+![alt text](https://i.imgur.com/hejf6HA.png)
 
 I built this into a jar file.
